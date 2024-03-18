@@ -38,7 +38,7 @@ export default {
   methods: {
     // Add to cart feature emits function from app.vue
     addToCart(lesson) {
-      this.$emit("add-item-to-cart", lesson._id);
+      this.$emit("add-item-to-cart", lesson);
     },
   },
 };

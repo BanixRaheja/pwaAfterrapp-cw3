@@ -26,7 +26,7 @@
           </div>
         </div>
       </div>
-
+      
 
 
     </main>
@@ -166,37 +166,29 @@ export default {
     isItemInCart(_id) {
       return !!this.cart.find((item) => item._id === _id);
     },
-    addToCart(_id) {
-      const lesson = this.lessons.find((lesson) => lesson._id === _id);
+    addToCart(lesson) {
+      lesson.spaces -= 1;
+      this.cart.push(lesson);
 
-      if (!this.isItemInCart(lesson._id)) {
-        this.cart.push({
-          ...lesson,
-          spaces: 1,
-        });
-      } else {
-        if (lesson.spaces > 0) {
-          this.cart = this.cart.map((item) => {
-            if (item._id === _id) return { ...item, spaces: ++item.spaces };
-            return item;
-          });
+    },
+    removeFromCart(lesson) {
+
+      const cartLength = this.cart.length;
+
+      for (let i = 0; i < cartLength; i++) {
+        let cu_lesson = this.cart[i];
+
+        if (JSON.stringify(cu_lesson) === JSON.stringify(lesson)) {
+          lesson.spaces += 1;
+          this.cart.splice(i, 1);
+          break;
         }
+
+
+
+
       }
 
-      this.updateLessonSpaces("decrease", lesson._id);
-    },
-    removeFromCart(_id) {
-      // get index of cart item
-      const index = this.cart.findIndex((item) => item._id === _id);
-
-      // remove item from cart
-      this.cart.splice(index, 1);
-
-      // update lesson spaces
-      this.updateLessonSpaces("reset", _id);
-
-      // toggle cart display if no item is in cart
-      if (!this.cart.length) this.toggleCartDisplay();
     },
     toggleCartDisplay() {
       if (this.page === Lessons && this.cart.length > 0) {
@@ -206,6 +198,7 @@ export default {
       }
     },
     checkout() {
+
       this.cart.forEach(async (item) => {
         await this.createNewOrder({
           name: this.checkoutForm.name.value,
@@ -222,8 +215,6 @@ export default {
 
       this.checkedOut = true;
 
-      this.toggleCartDisplay();
-
       this.cart = [];
 
       Object.keys(this.checkoutForm).every(
@@ -231,11 +222,11 @@ export default {
       );
 
       setTimeout(() => {
+        this.page = Lessons;
         this.checkedOut = false;
       }, 3000);
     },
   },
- 
   computed: {
     cartLength() {
       if (this.cart.length > 0)
