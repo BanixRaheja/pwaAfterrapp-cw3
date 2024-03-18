@@ -26,10 +26,16 @@
           </div>
         </div>
       </div>
-      
+    <button @click="toggleTestConsole">Console</button>
 
+    <Console v-if="testConsole" apiEndpoint="https://webcoursework2.eu-north-1.elasticbeanstalk.com/lessons" @on-reload="reload"
+      @on-cache-delete="deleteCache" ></Console>
 
     </main>
+
+   
+
+
 
     <component :is="page" :filteredLessons="filteredLessons" :cart="cart" :checkoutForm="checkoutForm"
       @add-item-to-cart="addToCart" @remove-item-from-cart="removeFromCart" :isCheckoutFormValid="isCheckoutFormValid"
@@ -40,17 +46,20 @@
 <script>
 import Checkout from './components/Checkout.vue';
 import Lessons from './components/Lessons.vue';
-import Header from './components/Header.vue'
+import Header from './components/Header.vue';
+import Console from './components/Console.vue';
 
 export default {
   name: 'App',
   components: {
-    Checkout,
-    Lessons,
-    Header
+    'Checkout': Checkout,
+    'Lessons': Lessons,
+    "Header": Header,
+    "Console": Console,
   },
   data() {
     return {
+      testConsole: false,
       active: Lessons,
       page: Lessons,
       loading: false,
@@ -197,6 +206,14 @@ export default {
         this.page = Lessons;
       }
     },
+    toggleTestConsole(){
+      if(this.testConsole === false){
+        this.testConsole = true;
+      }else{
+        this.testConsole = false;
+      }
+
+    },
     checkout() {
 
       this.cart.forEach(async (item) => {
@@ -225,6 +242,27 @@ export default {
         this.page = Lessons;
         this.checkedOut = false;
       }, 3000);
+    },
+    reload(){
+      window.location.reload();
+    },
+    deleteCache(){
+      caches.keys().then((names) =>{
+        for (let name of names){
+          caches.delete(name);
+        }
+      })
+      console.log("[Cache] All Caches have been removed");
+    },
+    unregisterServiceWorkers(){
+      navigator.serviceWorker.getRegistration().then(function (registrations){
+        for(let registration of registrations){
+          registration.unregister();
+        }
+      })
+
+      console.log("[Service Workers] All Service Workers have been unregistered");
+
     },
   },
   computed: {
